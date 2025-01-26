@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Violations</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+    }
+    .container {
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #fff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: #f4f4f9;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button.delete {
+      background-color: #f44336;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+    input {
+      padding: 5px;
+      width: 90%;
+      margin: 5px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Manage Parking Violations</h1>
+    <table id="violationsTable">
+      <thead>
+        <tr>
+          <th>Violation ID</th>
+          <th>Description</th>
+          <th>Payment Status</th>
+          <th>Violation Amount</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Rows will be dynamically added here -->
+      </tbody>
+    </table>
+
+    <h2>Add New Violation</h2>
+    <form id="addViolationForm">
+      <input type="text" id="newViolationId" placeholder="Violation ID" required>
+      <input type="text" id="newDescription" placeholder="Description" required>
+      <input type="text" id="newPaymentStatus" placeholder="Payment Status" required>
+      <input type="text" id="newViolationAmount" placeholder="Violation Amount" required>
+      <button type="submit">Add Violation</button>
+    </form>
+  </div>
+
+  <script>
+    const apiUrl = "https://api.sheety.co/877a9330e9a4bc4fe4695be731674f77/violationI’d/sheet1";
+
+    // Fetch violations and display in the table
+    async function fetchViolations() {
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+      const tbody = document.querySelector("#violationsTable tbody");
+      tbody.innerHTML = ""; // Clear the table body
+
+      data.sheet1.forEach((violation) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${violation.violationId}</td>
+          <td><input type="text" value="${violation.description}" data-id="${violation.id}" data-field="description"></td>
+          <td><input type="text" value="${violation.paymentStatus}" data-id="${violation.id}" data-field="paymentStatus"></td>
+          <td><input type="text" value="${violation.violationAmount}" data-id="${violation.id}" data-field="violationAmount"></td>
+          <td>
+            <button class="delete" onclick="deleteViolation(${violation.id})">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      addEditListeners();
+    }
+
+    // Add listeners to input fields for editing
+    function addEditListeners() {
+      const inputs = document.querySelectorAll("#violationsTable tbody input");
+      inputs.forEach((input) => {
+        input.addEventListener("change", async (e) => {
+          const id = e.target.dataset.id;
+          const field = e.target.dataset.field;
+          const value = e.target.value;
+
+          // Update the violation
+          await fetch(`${apiUrl}/${id}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              sheet1: {
+                [field]: value,
+              },
+            }),
+          });
+
+          alert("Violation updated successfully!");
+          fetchViolations(); // Refresh the table
+        });
+      });
+    }
+
+    // Delete a violation
+    async function deleteViolation(id) {
+      if (confirm("Are you sure you want to delete this violation?")) {
+        await fetch(`${apiUrl}/${id}`, {
+          method: "DELETE",
+        });
+        alert("Violation deleted successfully!");
+        fetchViolations(); // Refresh the table
+      }
+    }
+
+    // Add a new violation
+    document.getElementById("addViolationForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const newViolation = {
+        violationId: document.getElementById("newViolationId").value,
+        description: document.getElementById("newDescription").value,
+        paymentStatus: document.getElementById("newPaymentStatus").value,
+        violationAmount: document.getElementById("newViolationAmount").value,
+      };
+
+      // Add the violation
+      await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ sheet1: newViolation }),
+      });
+
+      alert("New violation added successfully!");
+      document.getElementById("addViolationForm").reset();
+      fetchViolations(); // Refresh the table
+    });
+
+    // Initial fetch of violations
+    fetchViolations();
+  </script>
+</body>
+</html>
