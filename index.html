@@ -45,6 +45,9 @@
       border: 1px solid #ccc;
       border-radius: 4px;
     }
+    .error {
+      color: red;
+    }
   </style>
 </head>
 <body>
@@ -63,12 +66,35 @@
 
       if (!violationId) {
         resultDiv.style.display = "block";
-        resultDiv.innerHTML = "<p style='color: red;'>Please enter a Violation ID.</p>";
+        resultDiv.innerHTML = "<p class='error'>Please enter a Violation ID.</p>";
         return;
       }
 
-      // Replace with your Google Apps Script Web App URL
-      const scriptURL = "https://script.google.com/macros/s/AKfycbx2Y4HoqVurbzWNELk7AmAixq1idZDiWhtS9O-9ms1n8TiZkWM8K1RZHiGHOaojkfQgew/exec";
+      const apiUrl = "https://api.sheety.co/877a9330e9a4bc4fe4695be731674f77/violationI’d/sheet1";
 
       try {
-        const response = await fetch(`${scriptURL}?violationId=${
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+
+        const record = data.sheet1.find(item => item.violationId.toString() === violationId);
+
+        if (record) {
+          resultDiv.style.display = "block";
+          resultDiv.innerHTML = `
+            <p><strong>Violation ID:</strong> ${record.violationId}</p>
+            <p><strong>Description:</strong> ${record.description}</p>
+            <p><strong>Payment Status:</strong> ${record.paymentStatus}</p>
+            <p><strong>Violation Amount:</strong> ${record.violationAmount}</p>
+          `;
+        } else {
+          resultDiv.style.display = "block";
+          resultDiv.innerHTML = "<p class='error'>No violation found with the given ID.</p>";
+        }
+      } catch (error) {
+        resultDiv.style.display = "block";
+        resultDiv.innerHTML = `<p class='error'>Error fetching data: ${error.message}</p>`;
+      }
+    }
+  </script>
+</body>
+</html>
