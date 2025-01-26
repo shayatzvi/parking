@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parking Violation Lookup</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+    }
+    .container {
+      max-width: 400px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #fff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 10px;
+      background: #f9f9f9;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Parking Violation Lookup</h1>
+    <p>Enter your Violation ID below:</p>
+    <input type="text" id="violationId" placeholder="Enter Violation ID">
+    <button onclick="lookupViolation()">Check Violation</button>
+    <div id="result" class="result" style="display: none;"></div>
+  </div>
+
+  <script>
+    async function lookupViolation() {
+      const violationId = document.getElementById('violationId').value.trim();
+      const resultDiv = document.getElementById('result');
+
+      if (!violationId) {
+        resultDiv.style.display = "block";
+        resultDiv.innerHTML = "<p style='color: red;'>Please enter a Violation ID.</p>";
+        return;
+      }
+
+      // Replace with your Google Apps Script Web App URL
+      const scriptURL = "https://script.google.com/macros/s/AKfycbx2Y4HoqVurbzWNELk7AmAixq1idZDiWhtS9O-9ms1n8TiZkWM8K1RZHiGHOaojkfQgew/exec";
+
+      try {
+        const response = await fetch(`${scriptURL}?violationId=${
